@@ -8,3 +8,6 @@ farther from the center of the window.
 This was done only for fun / as a hobby.
 
 Note: JavaScript is not truly my business, but 'tis pretty.
+
+A demo can be viewed there:
+https://matyastoth.github.io/StarsLivelyWallpaper/Stars/
