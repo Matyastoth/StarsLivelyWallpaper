@@ -19,8 +19,8 @@
 
 //System variables storing the width and height of the window frame.
 //  A bit wonky in a browser, as there it takes the monitors width and height.
-let width = innerWidth;
-let height = innerHeight;
+const width = innerWidth;
+const height = innerHeight;
 let stars_count = 200;
 
 
@@ -37,13 +37,10 @@ let cnv;
 
 //Center of canvas; note: this is incorrect in WebGL rendering mode -
 //  there, the center is 0, 0.
-let centerX = width / 2;
-let centerY = height / 2;
+const centerX = width / 2;
+const centerY = height / 2;
 
 //Variables for calculations regarding the mouse moving.
-let x_dist;
-let y_dist;
-let dist;
 let max_dist;
 
 let stars = [];
@@ -52,18 +49,14 @@ function setup () {
 
   //Creating the drawing canvas, and determining the center.
   cnv = createCanvas(width, height);
-  max_dist = sqrt(pow(centerX,2) + pow(centerY,2));
-  
-  //Unfortunately, the mouseWheel() function doesn't like to cooperate with the mouseMoved().
-  // It's still included there - if you want to check how it works, comment out the other command.
-  //cnv.mouseWheel(array_push_pop);
-  cnv.mouseMoved(adjust_speed_size);
-  
+  //Maximum distance from the center is half of the diagonal
+  max_dist = sqrt(pow(width, 2) + pow(height, 2)) / 2;
+
   frameRate(60);
 
   //Filling the stars array; while quite 'slow', this needs to be done only once.
   for (let i = 0; i < stars_count; i++) {
-    stars.push(new Star);
+    stars.push(new Star());
   }
 }
 
@@ -79,14 +72,14 @@ function draw () {
 // The stars are drawn by a class method, which also updates the information regarding
 // an individual instance of a class object.
 class Star {
-  
+
   constructor () {
     this.x = width - 2*random(0,width);
     this.y = height - 2*random(0,height);
     this.speed = 1.0;
     this.size = 1.0;
   }
-  
+
   update() {
     //The star speeds up exponentially and moves straight away from the center;
     //  this gives the illusion of moving through a 3D space.
@@ -94,7 +87,7 @@ class Star {
     this.y *= this.speed;
     this.speed *= speed_factor;
     this.size *= size_factor;
-    
+
     //If out of the screen...
     if(4*this.x*this.x > width*width || 4*this.y*this.y > height*height) {
       //Resetting the star. I guess this could be more elegant...
@@ -113,21 +106,18 @@ class Star {
 
 //This function is attached to the mousewheel listener of the canvas;
 // controls how stars show up when the mousewheel is rolled up and down.
-function array_push_pop(event) {
-  //The number '125' is a hard-coded number corresponding to 1 tick, based on my mouse.
-  //  Depending on the mouse used, deltaY might return a different number.
-  stars_count -= event.deltaY / 125;
-  while (stars.length > stars_count) {
+function mouseWheel(event) {
+  //Get direction by looking at the sign of the delta
+  const dir = - Math.sign(event.deltaY);
+
+  if (dir < 0) { //scrolling down
     //This makes sure that the script doesn't crash when the 'stars' array is empty.
-    if (stars.length - stars_count > 25) {
-      stars.pop();
-    }
-  }
-  while (stars.length < stars_count) {
+    stars.length && stars.pop();
+  } else {
     //Setting a hard limit of 1000 to the number of stars;
     // of course, depends on the system how many it can handle at once.
     if (stars.length < 1000) {
-      stars.push(new Star);
+      stars.push(new Star());
     }
   }
 
@@ -143,23 +133,18 @@ function array_push_pop(event) {
 // simply it doesn't look good.
 //Additional warning: wonky names.
 
-let dist_ratio;
-
 //This ratio guarantees that the stars don't grow too fast compared to their speed.
-let size_speed_ratio = 4;
+const size_speed_ratio = 4;
 //This number sets how 'fast' can the stars move.
-let step_fineness = 200;
-function adjust_speed_size(event) {
-  //Calculating X and Y distance from center
-  x_dist = abs(centerX - mouseX);
-  y_dist = abs(centerY - mouseY);
+const step_fineness = 200;
 
+function mouseMoved(event) {
   //Absolute distance from center
-  dist = sqrt(pow(x_dist,2) + pow(y_dist,2));
+  const mouseDistance = dist(mouseX, mouseY, centerX, centerY);
 
   //...getting back a number between 0-1000, expressing how far are we from the center.
-  dist_ratio = 1000 * dist / max_dist;
-  
+  const dist_ratio = 1000 * mouseDistance / max_dist;
+
   //This way, it's guaranteed that we don't have collapsing stars :)
   speed_factor = base_sp_f + 0.0001 * (dist_ratio/step_fineness);
   size_factor = base_si_f + 0.01 * (dist_ratio/(step_fineness*size_speed_ratio));
