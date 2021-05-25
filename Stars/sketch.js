@@ -144,8 +144,9 @@ function mouseMoved(event) {
 
   //...getting back a number between 0-1000, expressing how far are we from the center.
   const dist_ratio = 1000 * mouseDistance / max_dist;
-
-  //This way, it's guaranteed that we don't have collapsing stars :)
+  
+  //I add to the base speed to guarantee the stars are moving from the center -
+  // This way, it's guaranteed that we don't have collapsing stars :)
   speed_factor = base_sp_f + 0.0001 * (dist_ratio/step_fineness);
   size_factor = base_si_f + 0.01 * (dist_ratio/(step_fineness*size_speed_ratio));
 
